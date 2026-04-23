@@ -12,7 +12,7 @@ body,html{height:100%;overflow:hidden;color:#fff}
 
 /* BG */
 .bg{position:fixed;inset:0;z-index:-2}
-.bg video{width:100%;height:100%;object-fit:cover;transition:transform 0.8s ease}
+.bg video{width:100%;height:100%;object-fit:cover;transition:transform 0.8s ease, filter 0.2s}
 
 /* INTRO */
 #intro{
@@ -37,7 +37,7 @@ body,html{height:100%;overflow:hidden;color:#fff}
  position:absolute;
  left:50%;top:50%;
 
- transform:translate(-50%, 110vh);
+ transform:translate(-50%,110vh);
  opacity:0;
 
  border-radius:30px;
@@ -52,11 +52,11 @@ body,html{height:100%;overflow:hidden;color:#fff}
 }
 
 .card.show{
- transform:translate(-50%, -50%);
+ transform:translate(-50%,-50%);
  opacity:1;
 }
 
-/* INNER (для баса) */
+/* INNER */
 .cardInner{
  width:100%;
  height:100%;
@@ -67,7 +67,7 @@ body,html{height:100%;overflow:hidden;color:#fff}
 .centerWrap{
  position:absolute;top:50%;left:50%;
  transform:translate(-50%,-50%);
- display:flex;flex-direction:column;align-items:center;gap:12px;
+ display:flex;flex-direction:column;align-items:center;gap:10px;
 }
 
 /* AVATAR */
@@ -75,12 +75,20 @@ body,html{height:100%;overflow:hidden;color:#fff}
  width:130px;height:130px;border-radius:50%;
  background:url('avatar.jpg') center/cover no-repeat;
  box-shadow:0 0 20px #4c00ff;
+ cursor:pointer;
 }
 
 /* NAME */
 .name{
  font-size:26px;
  text-shadow:0 0 10px #4c00ff;
+}
+
+/* STATUS */
+.status{
+ font-size:14px;
+ opacity:0.7;
+ text-shadow:0 0 8px #4c00ff;
 }
 
 /* LINKS */
@@ -103,11 +111,9 @@ body,html{height:100%;overflow:hidden;color:#fff}
  display:flex;flex-direction:column;gap:8px;
 }
 
-/* VOLUME */
 .volumeWrap{display:flex;gap:6px;align-items:center}
 #volume{width:80px}
 
-/* TIME */
 .time{display:flex;justify-content:space-between;font-size:12px;opacity:0.7}
 
 /* PROGRESS */
@@ -138,6 +144,26 @@ body,html{height:100%;overflow:hidden;color:#fff}
  box-shadow:0 0 10px #4c00ff;
 }
 
+/* CLICK FX */
+.clickFX{
+ position:fixed;
+ border-radius:50%;
+ pointer-events:none;
+ transform:translate(-50%,-50%);
+ background:radial-gradient(circle,#6a00ff,transparent);
+ animation:clickAnim 0.6s ease-out forwards;
+}
+@keyframes clickAnim{
+ from{width:0;height:0;opacity:1}
+ to{width:200px;height:200px;opacity:0}
+}
+
+/* SECRET */
+.secret{
+ box-shadow:0 0 80px #6a00ff,0 0 120px #00c3ff !important;
+ border:1px solid #00c3ff !important;
+}
+
 /* MOBILE */
 @media(max-width:768px){
  .card{width:90vw;height:85vh}
@@ -165,6 +191,7 @@ body,html{height:100%;overflow:hidden;color:#fff}
    <div class="centerWrap">
     <div class="avatar"></div>
     <div class="name">ay3ent</div>
+    <div class="status" id="status">online</div>
 
     <div class="links">
      <a href="https://twitch.tv/ay3ent" target="_blank" class="link">
@@ -177,7 +204,6 @@ body,html{height:100%;overflow:hidden;color:#fff}
    </div>
 
    <div class="player">
-
     <div class="volumeWrap">
      <span id="volIcon">🔊</span>
      <input type="range" id="volume" min="0" max="1" step="0.01" value="1">
@@ -197,7 +223,6 @@ body,html{height:100%;overflow:hidden;color:#fff}
     <div class="controls">
      <button id="play">▶</button>
     </div>
-
    </div>
 
   </div>
@@ -220,9 +245,11 @@ const current=document.getElementById('current');
 const duration=document.getElementById('duration');
 const eqBars=document.querySelectorAll('#eq div');
 const video=document.getElementById('bgvid');
+const statusEl=document.getElementById('status');
 
 let ctx,analyser,source;
 
+/* INTRO */
 intro.onclick=()=>{
  intro.classList.add('hide');
  video.style.transform='scale(1.1)';
@@ -247,17 +274,15 @@ intro.onclick=()=>{
  animate();
 };
 
+/* PLAYER */
 playBtn.onclick=()=>{
- if(audio.paused){
-  audio.play(); playBtn.textContent='⏸';
- }else{
-  audio.pause(); playBtn.textContent='▶';
- }
+ if(audio.paused){audio.play();playBtn.textContent='⏸'}
+ else{audio.pause();playBtn.textContent='▶'}
 };
 
 volume.oninput=()=>{
  audio.volume=volume.value;
- volIcon.textContent = volume.value==0?'🔇':volume.value<0.5?'🔉':'🔊';
+ volIcon.textContent=volume.value==0?'🔇':volume.value<0.5?'🔉':'🔊';
 };
 
 audio.onloadedmetadata=()=>{
@@ -282,6 +307,34 @@ function format(t){
  return m+':'+s;
 }
 
+/* STATUS */
+const statuses=["online","listening to music","coding...","afk"];
+setInterval(()=>{
+ statusEl.textContent=statuses[Math.floor(Math.random()*statuses.length)];
+},4000);
+
+/* CLICK FX */
+document.addEventListener('click',(e)=>{
+ let fx=document.createElement('div');
+ fx.className='clickFX';
+ fx.style.left=e.clientX+'px';
+ fx.style.top=e.clientY+'px';
+ document.body.appendChild(fx);
+ setTimeout(()=>fx.remove(),600);
+});
+
+/* SECRET */
+let clicks=0;
+document.querySelector('.avatar').onclick=(e)=>{
+ e.stopPropagation();
+ clicks++;
+ if(clicks>=5){
+  card.classList.toggle('secret');
+  clicks=0;
+ }
+};
+
+/* ANIMATION */
 function animate(){
  requestAnimationFrame(animate);
 
@@ -293,8 +346,14 @@ function animate(){
  });
 
  let bass=data[1]/255;
- cardInner.style.transform=`scale(${1+bass*0.04})`;
- video.style.filter=`brightness(${1+bass*0.4})`;
+
+ cardInner.style.transform=`scale(${1+bass*0.05})`;
+
+ card.style.boxShadow=`0 0 ${40+bass*80}px #6a00ff,0 0 ${60+bass*120}px #00c3ff`;
+
+ document.querySelector('.name').style.transform=`scale(${1+bass*0.02})`;
+
+ video.style.filter=`brightness(${1+bass*0.5})`;
 }
 </script>
 
