@@ -10,14 +10,23 @@
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Bungee','Rubik Storm',sans-serif}
 body,html{height:100%;overflow:hidden;background:transparent;color:#fff}
 
-.bg{position:fixed;inset:0;z-index:-2;overflow:hidden}
-.bg video{width:100%;height:100%;object-fit:cover;transition:transform 1s ease, filter 0.2s}
+/* VIDEO */
+.bg{position:fixed;inset:0;z-index:-2}
+.bg video{width:100%;height:100%;object-fit:cover;transition:0.3s}
 
-#intro{position:fixed;inset:0;backdrop-filter:blur(40px);display:flex;justify-content:center;align-items:center;font-size:28px;cursor:pointer;z-index:999}
+/* INTRO */
+#intro{
+ position:fixed;inset:0;
+ backdrop-filter:blur(40px);
+ display:flex;justify-content:center;align-items:center;
+ font-size:28px;cursor:pointer;z-index:999
+}
 
+/* MAIN */
 #main{display:none;position:fixed;inset:0}
 #main.show{display:block}
 
+/* CARD */
 .card{
  width:80vw;height:80vh;
  position:absolute;left:50%;top:50%;
@@ -27,15 +36,16 @@ body,html{height:100%;overflow:hidden;background:transparent;color:#fff}
  background:rgba(20,20,40,0.1);
  box-shadow:0 0 40px rgba(80,0,200,0.5);
  border:1px solid rgba(120,0,255,0.3);
- transition:transform 0.1s;
 }
 
+/* CENTER */
 .centerWrap{
  position:absolute;top:50%;left:50%;
  transform:translate(-50%,-50%);
  display:flex;flex-direction:column;align-items:center;gap:12px;
 }
 
+/* AVATAR */
 .avatar{
  width:130px;height:130px;border-radius:50%;
  background:url('avatar.jpg') center/cover no-repeat;
@@ -44,15 +54,14 @@ body,html{height:100%;overflow:hidden;background:transparent;color:#fff}
 }
 @keyframes breath{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
 
+/* NAME */
 .name{
  font-size:26px;text-align:center;
  text-shadow:0 0 10px #4c00ff,0 0 20px #1a00ff;
- animation:glow 2s infinite alternate;
 }
-@keyframes glow{from{text-shadow:0 0 10px #4c00ff}to{text-shadow:0 0 25px #6a00ff}}
 
+/* LINKS */
 .links{display:flex;gap:30px}
-.link{position:relative}
 .link img{width:40px;transition:0.3s}
 .link:hover img{transform:scale(1.3);filter:drop-shadow(0 0 10px #4c00ff)}
 .link span{
@@ -63,18 +72,47 @@ body,html{height:100%;overflow:hidden;background:transparent;color:#fff}
 }
 .link:hover span{opacity:1}
 
+/* PLAYER */
 .player{
  position:absolute;bottom:20px;left:50%;
  transform:translateX(-50%);
  width:80%;max-width:300px;
- display:flex;flex-direction:column;align-items:center;gap:6px;
+ display:flex;flex-direction:column;align-items:center;gap:8px;
 }
 
-.eq{display:flex;gap:4px}
-.eq div{width:4px;height:10px;background:white;box-shadow:0 0 10px #4c00ff}
+/* VOLUME */
+.volumeWrap{
+ display:flex;align-items:center;gap:6px;
+}
+#volume{
+ width:80px;
+ opacity:0.8;
+}
 
-button{background:none;border:none;color:white;font-size:18px;cursor:pointer}
-input[type=range]{width:100%}
+/* PROGRESS */
+#progress{
+ width:100%;
+ height:4px;
+}
+
+/* EQ */
+.eq{
+ display:flex;
+ gap:4px;
+ align-items:flex-end;
+}
+.eq div{
+ width:4px;
+ height:5px;
+ background:white;
+ box-shadow:0 0 10px #4c00ff;
+}
+
+/* BUTTON */
+button{
+ background:none;border:none;
+ color:white;font-size:18px;cursor:pointer;
+}
 </style>
 </head>
 
@@ -88,33 +126,42 @@ input[type=range]{width:100%}
 
 <div id="main">
  <div class="card" id="card">
+
   <div class="centerWrap">
    <div class="avatar"></div>
    <div class="name">ay3ent</div>
 
    <div class="links">
-    <a href="https://twitch.tv/ay3ent" target="_blank" class="link">
-     <img src="twitch.png"><span>twitch</span>
+    <a href="https://twitch.tv/ay3ent" target="_blank">
+     <img src="twitch.png">
     </a>
-    <a href="https://t.me/ay3ent" target="_blank" class="link">
-     <img src="tg.png"><span>telegram</span>
+    <a href="https://t.me/ay3ent" target="_blank">
+     <img src="tg.png">
     </a>
    </div>
   </div>
 
   <div class="player">
-   <div style="display:flex;align-items:center;gap:8px">
+
+   <!-- volume -->
+   <div class="volumeWrap">
     <span id="volIcon">🔊</span>
-    <input type="range" id="volume" min="0" max="1" step="0.01" value="1" style="width:80px">
+    <input type="range" id="volume" min="0" max="1" step="0.01" value="1">
    </div>
 
+   <!-- play -->
+   <button id="play">▶</button>
+
+   <!-- progress -->
+   <input type="range" id="progress" value="0">
+
+   <!-- eq -->
    <div class="eq" id="eq">
     <div></div><div></div><div></div><div></div><div></div><div></div>
    </div>
 
-   <button id="play">▶</button>
-   <input type="range" id="progress" value="0">
   </div>
+
  </div>
 </div>
 
@@ -129,7 +176,6 @@ const progress=document.getElementById('progress');
 const volume=document.getElementById('volume');
 const volIcon=document.getElementById('volIcon');
 const eqBars=document.querySelectorAll('#eq div');
-const card=document.getElementById('card');
 const video=document.getElementById('bgvid');
 
 let ctx,analyser,source;
@@ -137,7 +183,7 @@ let ctx,analyser,source;
 intro.onclick=()=>{
  intro.style.display='none';
  main.classList.add('show');
- video.style.transform='scale(1.1)'; // zoom effect
+ video.style.transform='scale(1.1)';
 
  ctx=new(window.AudioContext||window.webkitAudioContext)();
  analyser=ctx.createAnalyser();
@@ -163,19 +209,26 @@ volume.oninput=()=>{
  else volIcon.textContent='🔊';
 }
 
+audio.ontimeupdate=()=>{
+ progress.value=(audio.currentTime/audio.duration)*100;
+}
+
+progress.oninput=()=>{
+ audio.currentTime=(progress.value/100)*audio.duration;
+}
+
 function animate(){
  requestAnimationFrame(animate);
  let data=new Uint8Array(analyser.frequencyBinCount);
  analyser.getByteFrequencyData(data);
 
- let bass=data[1]/255;
-
  eqBars.forEach((bar,i)=>{
-  bar.style.height=(data[i]*0.6)+"px";
+  let val=data[i]/255;
+  bar.style.height=(val*25+5)+'px';
  });
 
- card.style.transform=`translate(-50%,-50%) scale(${1+ bass*0.04})`;
- video.style.filter=`brightness(${1+ bass*0.4})`;
+ let bass=data[1]/255;
+ video.style.filter=`brightness(${1+bass*0.4})`;
 }
 </script>
 
